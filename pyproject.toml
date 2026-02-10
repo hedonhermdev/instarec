@@ -1,0 +1,18 @@
+[project]
+name = "instarec"
+version = "0.1.0"
+description = "Extract recommendations from Instagram reels"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=1.62.0",
+    "omniparse>=0.0.3",
+    "opencv-python>=4.13.0.92",
+    "pillow>=12.1.0",
+    "python-dotenv>=1.0.0",
+    "tqdm>=4.67.3",
+    "yt-dlp>=2026.2.4",
+]
+
+[project.scripts]
+instarec = "main:main"
