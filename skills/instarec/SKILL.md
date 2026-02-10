@@ -7,18 +7,68 @@ description: Extract media recommendations (music, videos, books, articles) from
 
 Extract media recommendations (music, videos, books, articles) from Instagram Reels.
 
-## Prerequisites
+## Setup
 
-The tool requires the following to be set up before use:
+### 1. Clone the repository
 
-| Requirement | How to verify | How to fix |
-|-------------|---------------|------------|
-| Python 3.12+ | `python3 --version` | Install via `pyenv` or system package manager |
+```bash
+git clone https://github.com/hedonhermdev/instarec.git
+cd instarec
+```
+
+### 2. Install system dependencies
+
+| Requirement | How to verify | How to install |
+|-------------|---------------|----------------|
 | `uv` package manager | `uv --version` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | `ffmpeg` | `ffmpeg -version` | `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux) |
-| Dependencies installed | `uv sync` in project root | Run `uv sync` |
-| `GEMINI_API_KEY` in `.env` | Check `.env` file exists with key | Create `.env` with `GEMINI_API_KEY=<key>` |
-| `cookies.txt` | File exists in project root | Export Instagram cookies using a browser extension (Netscape format) |
+
+Python 3.12+ is managed automatically by `uv` -- do NOT install it separately.
+
+### 3. Install Python and dependencies
+
+```bash
+uv sync
+```
+
+This will download the correct Python version (if needed) and install all project dependencies.
+
+### 4. Configure the Gemini API key
+
+The tool uses Google Gemini for visual frame analysis. You need a Gemini API key.
+
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey) and create an API key.
+2. Create a `.env` file in the project root:
+
+```bash
+echo 'GEMINI_API_KEY=your-api-key-here' > .env
+```
+
+**NEVER commit the `.env` file to version control.**
+
+### 5. Export Instagram cookies
+
+Instagram requires authentication to download Reels. You need to export your session cookies in Netscape format.
+
+1. Log in to Instagram in your browser.
+2. Use a browser extension to export cookies in Netscape/HTTP Cookie File format:
+   - Chrome: [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+   - Firefox: [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
+3. Save the exported file as `cookies.txt` in the project root.
+
+**NEVER commit `cookies.txt` to version control.** Cookies expire periodically -- if you get HTTP 401/403 errors, re-export fresh cookies.
+
+### Verify setup
+
+Run the following to confirm everything is configured:
+
+| Check | Command |
+|-------|---------|
+| uv installed | `uv --version` |
+| ffmpeg installed | `ffmpeg -version` |
+| Dependencies installed | `uv sync` (should complete without errors) |
+| API key configured | `grep GEMINI_API_KEY .env` (should show your key) |
+| Cookies present | `ls cookies.txt` (should exist) |
 
 ## Usage
 
@@ -44,7 +94,7 @@ uv run main.py <url> [--cookies <path>] [--model <model>] [--scene-threshold <fl
 
 ### Working directory
 
-All commands MUST be run from the project root: `/Users/tirthjain/src/instarec`
+All commands MUST be run from the project root (the cloned `instarec` directory).
 
 ## Output format
 
