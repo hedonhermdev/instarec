@@ -5,7 +5,7 @@
 Python CLI tool that extracts media recommendations from Instagram Reels.
 Pipeline: download reel (yt-dlp) -> extract unique frames (ffmpeg scene detection) -> VLM analysis (Google Gemini API) -> JSON output.
 
-- **Language:** Python 3.12+ (pinned in `.python-version`)
+- **Language:** Python 3.12+ (see `requires-python` in `pyproject.toml`)
 - **Package manager:** [uv](https://docs.astral.sh/uv/)
 - **External tools required:** `ffmpeg` (invoked via subprocess in `instarec/frames.py`)
 
@@ -16,12 +16,14 @@ main.py                      # CLI entry point: runs the full pipeline
 instarec/                    # Library package
   __init__.py
   download.py                # Stage 1: download reel via yt-dlp
-  frames.py                  # Stage 2: scene detection frame extraction
+  frames.py                  # Stage 2: scene-change frame extraction
   analyze.py                 # Stage 3: VLM frame analysis via Google Gemini
 scripts/                     # Standalone scripts (for debugging individual stages)
   extract_frames.py          # Scene detection + perceptual hash dedup
   extract_card.py            # CV-based card detection (OpenCV MSER)
   extract_card_vlm.py        # VLM-based card extraction
+skills/                      # AI agent skill definitions
+  instarec/SKILL.md
 pyproject.toml               # Project metadata & dependencies
 .env                         # API keys (GEMINI_API_KEY) — NEVER commit
 cookies.txt                  # yt-dlp auth cookies — NEVER commit
@@ -39,14 +41,17 @@ uv sync                     # Install all dependencies into .venv
 # Full pipeline: download -> extract frames -> VLM analysis -> JSON to stdout
 uv run main.py <instagram_reel_url>
 
+# Or use the installed entry point
+uv run instarec <instagram_reel_url>
+
 # Keep intermediate files in data/<reel_id>/ directory
 uv run main.py <instagram_reel_url> --keep-files
 
 # Use a different VLM model
-uv run main.py <url> --model gemini-2.5-flash-preview-05-20
+uv run main.py <url> --model gemini-2.5-flash
 
-# Adjust frame extraction sensitivity
-uv run main.py <url> --scene-threshold 0.2
+# Adjust frame extraction sensitivity (default: 0.05)
+uv run main.py <url> --scene-threshold 0.1
 ```
 
 ### Running Standalone Scripts
@@ -166,12 +171,7 @@ The following files contain secrets and must NEVER be committed:
 - `.env` — API keys
 - `cookies.txt` — authentication cookies
 
-These are not yet in `.gitignore`. If modifying `.gitignore`, add them:
-```
-.env
-cookies.txt
-data/
-```
+These are already in `.gitignore`.
 
 ## Dependencies
 
@@ -179,7 +179,9 @@ Key runtime dependencies (see `pyproject.toml`):
 | Package | Purpose |
 |---------|---------|
 | `yt-dlp` | Download Instagram reels |
-| `opencv-python` | Computer vision / MSER card detection (standalone scripts) |
-| `Pillow` | Image processing |
 | `google-genai` | Google Gemini API client (for VLM frame analysis) |
 | `python-dotenv` | Load `.env` files |
+| `Pillow` | Image processing |
+| `tqdm` | Progress bars for frame analysis |
+| `opencv-python` | Computer vision / MSER card detection (standalone scripts) |
+| `omniparse` | Document parsing utilities |
